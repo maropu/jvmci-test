@@ -16,9 +16,8 @@
 #
 
 import os, re, subprocess
-import platform, numpy, sys, sysconfig
+import platform, sys
 
-from waflib.Tools import waf_unit_test
 from distutils.version import StrictVersion
 from env import *
 
@@ -35,10 +34,10 @@ def llvm_config(options):
   return options
 
 def options(opt):
-  opt.load('compiler_cxx waf_unit_test');
+  opt.load('compiler_cxx');
 
 def configure(ctx):
-  ctx.load('compiler_cxx waf_unit_test');
+  ctx.load('compiler_cxx');
 
   # Checks if llvm-config can be executed
   ctx.find_program(LLVM_CONFIG)
