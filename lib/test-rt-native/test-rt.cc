@@ -121,8 +121,14 @@ JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_compileToF
       test_rt_unreachable(errMsg.str());
     }
 
-    // Inserts a trampoline code in the LLVM module
-    llvm::FunctionType *epf_signature = llvm::TypeBuilder<int(void *, int, int), false>::get(context);
+    // Inserts a trampoline code in the LLVM module:
+    //  - http://releases.llvm.org/7.0.1/docs/tutorial/index.html
+    // llvm::FunctionType *epf_signature = llvm::TypeBuilder<int(void *, int, int), false>::get(context);
+    llvm::FunctionType *epf_signature = llvm::FunctionType::get(
+      llvm::Type::getInt32Ty(context),
+      {llvm::PointerType::get(llvm::Type::getVoidTy(context), 0), llvm::Type::getInt32Ty(context), llvm::Type::getInt32Ty(context)},
+      false
+    );
     llvm::Function *epf = llvm::cast<llvm::Function>(m->getOrInsertFunction(entryPointFuncName, epf_signature));
     epf->setCallingConv(llvm::CallingConv::C);
     epf->arg_begin();
