@@ -55,8 +55,8 @@ import io.github.maropu.JVMCITest;
   "-XX:+UseSuperWord",
   // "-XX:+UnlockDiagnosticVMOptions",
   // "-XX:CompileCommand=print,*LoopAdd.*",
-  // "-XX:PrintAssembly", // Print all the assembly
-  // "-XX:PrintAssemblyOptions=intel",
+  // "-XX:+PrintAssembly", // Print all the assembly
+  // "-XX:PrintAssemblyOptions=intel"
 })
 @Warmup(iterations = 5)
 @Measurement(iterations = 10)
