@@ -3,21 +3,23 @@ package io.github.maropu
 import org.scalatest.FunSuite
 
 class JVMCITestSuite extends FunSuite {
-  import JVMCITest._
 
-  private val allFunctions = Seq(
-    ("jvmAdd", jvmAdd _),
-    ("jniAdd", jniAdd _),
-    ("nativeAdd", nativeAdd _),
-    ("nativeAddInGeneratedMethod", nativeAddInGeneratedMethod _),
-    ("pyNativeAdd", pyNativeAdd _)
+  private val intAddFunctions = Seq(
+    ("jvmAdd", IntAddJVMCITest.jvmAdd _),
+    ("jniAdd", IntAddJVMCITest.jniAdd _),
+    ("nativeAdd", IntAddJVMCITest.nativeAdd _),
+    ("nativeAddInGeneratedMethod", IntAddJVMCITest.nativeAddInGeneratedMethod _),
+    ("pyNativeAdd", IntAddJVMCITest.pyNativeAdd _)
   )
 
-  private val jvmciFunctions =
-    Seq(nativeAdd _, nativeAddInGeneratedMethod _, pyNativeAdd _)
+  private val jvmciFunctions = Seq(
+    IntAddJVMCITest.nativeAdd _,
+    IntAddJVMCITest.nativeAddInGeneratedMethod _,
+    IntAddJVMCITest.pyNativeAdd _
+  )
 
-  allFunctions.foreach { case (testName, f) =>
-    test(testName) {
+  intAddFunctions.foreach { case (testName, f) =>
+    test(s"${classOf[IntAddJVMCITest].getSimpleName}.$testName") {
       assert(f(-3, 7) === 4)
       assert(f(3, 2) === 5)
       assert(f(1, 6) === 7)

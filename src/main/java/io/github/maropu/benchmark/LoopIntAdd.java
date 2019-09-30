@@ -15,15 +15,15 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 
-import io.github.maropu.JVMCITest;
+import io.github.maropu.IntAddJVMCITest;
 
 // -- openjdk version "11.0.2" 2019-01-15 (Intel Core i5)
 // Benchmark                           Mode  Cnt        Score       Error  Units
-// LoopAdd.jniAdd                      avgt   10  1003890.060 ± 14423.020  ns/op
-// LoopAdd.jvmAdd                      avgt   10    17700.934 ±   157.821  ns/op
-// LoopAdd.nativeAdd                   avgt   10   367751.265 ±  5143.389  ns/op
-// LoopAdd.nativeAddInGeneratedMethod  avgt   10   587851.174 ± 14336.564  ns/op
-// LoopAdd.pyNativeAdd                 avgt   10   331251.631 ±  5216.444  ns/op
+// LoopIntAdd.jniAdd                      avgt   10  1003890.060 ± 14423.020  ns/op
+// LoopIntAdd.jvmAdd                      avgt   10    17700.934 ±   157.821  ns/op
+// LoopIntAdd.nativeAdd                   avgt   10   367751.265 ±  5143.389  ns/op
+// LoopIntAdd.nativeAddInGeneratedMethod  avgt   10   587851.174 ± 14336.564  ns/op
+// LoopIntAdd.pyNativeAdd                 avgt   10   331251.631 ±  5216.444  ns/op
 @State(Scope.Thread)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @BenchmarkMode(Mode.AverageTime)
@@ -54,13 +54,13 @@ import io.github.maropu.JVMCITest;
   "-XX:+EnableJVMCI",
   "-XX:+UseSuperWord",
   // "-XX:+UnlockDiagnosticVMOptions",
-  // "-XX:CompileCommand=print,*LoopAdd.*",
+  // "-XX:CompileCommand=print,*LoopIntAdd.*",
   // "-XX:+PrintAssembly", // Print all the assembly
   // "-XX:PrintAssemblyOptions=intel"
 })
 @Warmup(iterations = 5)
 @Measurement(iterations = 10)
-public class LoopAdd {
+public class LoopIntAdd {
   final static int SIZE = 65536;
 
   @State(Scope.Thread)
@@ -86,7 +86,7 @@ public class LoopAdd {
   @CompilerControl(CompilerControl.Mode.DONT_INLINE)
   public void jvmAdd(Context context) {
     for (int i = 0; i < SIZE; i++) {
-      context.ar3[i] = JVMCITest.jvmAdd(context.ar1[i], context.ar2[i]);
+      context.ar3[i] = IntAddJVMCITest.jvmAdd(context.ar1[i], context.ar2[i]);
     }
   }
 
@@ -94,7 +94,7 @@ public class LoopAdd {
   @CompilerControl(CompilerControl.Mode.DONT_INLINE)
   public void jniAdd(Context context) {
     for (int i = 0; i < SIZE; i++) {
-      context.ar3[i] = JVMCITest.jniAdd(context.ar1[i], context.ar2[i]);
+      context.ar3[i] = IntAddJVMCITest.jniAdd(context.ar1[i], context.ar2[i]);
     }
   }
 
@@ -102,7 +102,7 @@ public class LoopAdd {
   @CompilerControl(CompilerControl.Mode.DONT_INLINE)
   public void nativeAdd(Context context) {
     for (int i = 0; i < SIZE; i++) {
-      context.ar3[i] = JVMCITest.nativeAdd(context.ar1[i], context.ar2[i]);
+      context.ar3[i] = IntAddJVMCITest.nativeAdd(context.ar1[i], context.ar2[i]);
     }
   }
 
@@ -110,7 +110,7 @@ public class LoopAdd {
   @CompilerControl(CompilerControl.Mode.DONT_INLINE)
   public void nativeAddInGeneratedMethod(Context context) {
     for (int i = 0; i < SIZE; i++) {
-      context.ar3[i] = JVMCITest.nativeAddInGeneratedMethod(context.ar1[i], context.ar2[i]);
+      context.ar3[i] = IntAddJVMCITest.nativeAddInGeneratedMethod(context.ar1[i], context.ar2[i]);
     }
   }
 
@@ -118,7 +118,7 @@ public class LoopAdd {
   @CompilerControl(CompilerControl.Mode.DONT_INLINE)
   public void pyNativeAdd(Context context) {
     for (int i = 0; i < SIZE; i++) {
-      context.ar3[i] = JVMCITest.pyNativeAdd(context.ar1[i], context.ar2[i]);
+      context.ar3[i] = IntAddJVMCITest.pyNativeAdd(context.ar1[i], context.ar2[i]);
     }
   }
 }

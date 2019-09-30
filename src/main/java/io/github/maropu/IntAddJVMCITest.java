@@ -10,7 +10,7 @@ import io.github.maropu.jvmci.AsmInjector;
 import io.github.maropu.nvlib.TestRuntimeNative;
 import io.github.maropu.nvlib.TestRuntimeNativeLoader;
 
-public class JVMCITest {
+public class IntAddJVMCITest {
 
   private static final TestRuntimeNative testApi = TestRuntimeNativeLoader.loadApi();
 
@@ -27,7 +27,7 @@ public class JVMCITest {
   }
 
   static void initializeNativeAdd() throws Exception {
-    Method m = JVMCITest.class.getMethod("nativeAdd", int.class, int.class);
+    Method m = IntAddJVMCITest.class.getMethod("nativeAdd", int.class, int.class);
     new AsmInjector().injectFuncAddr(nativeFuncAddr, m);
   }
 
@@ -63,7 +63,7 @@ public class JVMCITest {
       ));
     long compileState = testApi.compileToFunc(bitcode, funcNameInBitcode);
     pyNativeFuncAddr = testApi.getFuncAddrFromCompileState(compileState);
-    Method m = JVMCITest.class.getMethod("pyNativeAdd", int.class, int.class);
+    Method m = IntAddJVMCITest.class.getMethod("pyNativeAdd", int.class, int.class);
     new AsmInjector().injectFuncAddr(pyNativeFuncAddr, m);
     // testApi.releaseCompileState(compileState);
   }
