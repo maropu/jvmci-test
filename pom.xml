@@ -26,13 +26,6 @@
   <name>JVMCI Test</name>
   <description>JVMCI tests</description>
   <url>https://github.com/maropu/jvmci-test</url>
-  <licenses>
-    <license>
-      <name>Apache 2.0 License</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
 
   <scm>
     <url>https://github.com/maropu/jvmci-test.git</url>
@@ -53,18 +46,15 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <llvm.version>7.0.1</llvm.version>
     <java.version>11</java.version>
-    <maven.version>3.6.2</maven.version>
     <scala.version>2.12.10</scala.version>
     <scala.binary.version>2.12</scala.binary.version>
+    <maven.version>3.6.2</maven.version>
+    <snappy.version>1.1.2.6</snappy.version>
     <janino.version>3.0.0</janino.version>
     <jmh.version>1.19</jmh.version>
-    <llvm.version>7.0.1</llvm.version>
-    <slf4j.version>1.7.16</slf4j.version>
-    <log4j.version>1.2.17</log4j.version>
     <scalatest.version>3.0.5</scalatest.version>
-    <scalacheck.version>1.13.5</scalacheck.version>
-    <snappy.version>1.1.2.6</snappy.version>
 
     <test.java.home>${java.home}</test.java.home>
     <test.exclude.tags></test.exclude.tags>
@@ -75,18 +65,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j.version}</version>
-      <scope>compile</scope>
-    </dependency>
     <dependency>
       <groupId>org.xerial.snappy</groupId>
       <artifactId>snappy-java</artifactId>
@@ -100,24 +78,18 @@
       <scope>compile</scope>
     </dependency>
     <dependency>
+      <groupId>org.openjdk.jmh</groupId>
+      <artifactId>jmh-generator-annprocess</artifactId>
+      <version>${jmh.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
       <groupId>org.codehaus.janino</groupId>
       <artifactId>janino</artifactId>
       <version>${janino.version}</version>
       <scope>compile</scope>
     </dependency>
-    <dependency>
-      <groupId>org.openjdk.jmh</groupId>
-      <artifactId>jmh-generator-annprocess</artifactId>
-      <version>${jmh.version}</version>
-      <scope>provided</scope>
-    </dependency>
 
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>${log4j.version}</version>
-      <scope>compile</scope>
-    </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
@@ -128,12 +100,6 @@
       <groupId>org.scalatest</groupId>
       <artifactId>scalatest_${scala.binary.version}</artifactId>
       <version>${scalatest.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.scalacheck</groupId>
-      <artifactId>scalacheck_${scala.binary.version}</artifactId>
-      <version>${scalacheck.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -168,30 +134,6 @@
                 </requireJavaVersion>
               </rules>
             </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.scalastyle</groupId>
-        <artifactId>scalastyle-maven-plugin</artifactId>
-        <version>0.8.0</version>
-        <configuration>
-          <verbose>false</verbose>
-          <failOnViolation>true</failOnViolation>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <failOnWarning>false</failOnWarning>
-          <sourceDirectory>src/main/scala</sourceDirectory>
-          <testSourceDirectory>src/test/scala</testSourceDirectory>
-          <configLocation>scalastyle-config.xml</configLocation>
-          <outputFile>target/scalastyle-output.xml</outputFile>
-          <inputEncoding>${project.build.sourceEncoding}</inputEncoding>
-          <outputEncoding>${project.reporting.outputEncoding}</outputEncoding>
-        </configuration>
-        <executions>
-          <execution>
-          <goals>
-            <goal>check</goal>
-          </goals>
           </execution>
         </executions>
       </plugin>
@@ -309,59 +251,6 @@
           </compilerArgs>
         </configuration>
       </plugin>
-      <!-- Surefire runs all Java tests -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.19.1</version>
-        <!-- Note config is repeated in scalatest config -->
-        <configuration>
-          <includes>
-            <include>**/Test*.java</include>
-            <include>**/*Test.java</include>
-            <include>**/*TestCase.java</include>
-            <include>**/*Suite.java</include>
-          </includes>
-          <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
-          <!-- <argLine>-Xmx3g -Xss4096k -XX:MaxMetaspaceSize=${MaxMetaspaceSize} -XX:ReservedCodeCacheSize=512m</argLine> -->
-          <argLine>--add-modules jdk.internal.vm.ci --add-modules jdk.internal.vm.compiler --add-exports jdk.internal.vm.ci/jdk.vm.ci.meta=ALL-UNNAMED --add-exports jdk.internal.vm.ci/jdk.vm.ci.code=ALL-UNNAMED --add-exports jdk.internal.vm.ci/jdk.vm.ci.code.site=ALL-UNNAMED --add-exports jdk.internal.vm.ci/jdk.vm.ci.runtime=ALL-UNNAMED,jdk.internal.vm.compiler --add-exports jdk.internal.vm.ci/jdk.vm.ci.hotspot=ALL-UNNAMED,jdk.internal.vm.compiler --add-exports jdk.internal.vm.ci/jdk.vm.ci.amd64=ALL-UNNAMED --add-exports jdk.internal.vm.compiler/org.graalvm.compiler.api.runtime=ALL-UNNAMED --add-exports jdk.internal.vm.compiler/org.graalvm.compiler.hotspot=ALL-UNNAMED --add-opens jdk.internal.vm.ci/jdk.vm.ci.hotspot=ALL-UNNAMED -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -Xmx3g -Xss4096k -XX:MaxMetaspaceSize=${MaxMetaspaceSize} -XX:ReservedCodeCacheSize=512m</argLine>
-          <environmentVariables>
-            <!--
-              Setting SPARK_DIST_CLASSPATH is a simple way to make sure any child processes
-              launched by the tests have access to the correct test-time classpath.
-            -->
-            <SPARK_DIST_CLASSPATH>${test_classpath}</SPARK_DIST_CLASSPATH>
-            <SPARK_PREPEND_CLASSES>1</SPARK_PREPEND_CLASSES>
-            <SPARK_SCALA_VERSION>${scala.binary.version}</SPARK_SCALA_VERSION>
-            <SPARK_TESTING>1</SPARK_TESTING>
-            <JAVA_HOME>${test.java.home}</JAVA_HOME>
-          </environmentVariables>
-          <systemProperties>
-            <log4j.configuration>file:src/test/resources/log4j.properties</log4j.configuration>
-            <java.awt.headless>true</java.awt.headless>
-            <java.io.tmpdir>${project.build.directory}/tmp</java.io.tmpdir>
-            <spark.test.home>${spark.test.home}</spark.test.home>
-            <spark.testing>1</spark.testing>
-            <spark.master.rest.enabled>false</spark.master.rest.enabled>
-            <spark.ui.enabled>false</spark.ui.enabled>
-            <spark.ui.showConsoleProgress>false</spark.ui.showConsoleProgress>
-            <spark.unsafe.exceptionOnMemoryLeak>true</spark.unsafe.exceptionOnMemoryLeak>
-            <spark.memory.debugFill>true</spark.memory.debugFill>
-            <!-- Needed by sql/hive tests. -->
-            <test.src.tables>src</test.src.tables>
-          </systemProperties>
-          <failIfNoTests>false</failIfNoTests>
-          <excludedGroups>${test.exclude.tags}</excludedGroups>
-        </configuration>
-        <executions>
-          <execution>
-            <id>test</id>
-            <goals>
-              <goal>test</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <!-- Scalatest runs all Scala tests -->
       <plugin>
         <groupId>org.scalatest</groupId>
@@ -371,19 +260,12 @@
         <configuration>
           <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
           <junitxml>.</junitxml>
-          <filereports>SparkTestSuite.txt</filereports>
           <!-- <argLine>-ea -Xmx3g -XX:MaxMetaspaceSize=${MaxMetaspaceSize} -XX:ReservedCodeCacheSize=${CodeCacheSize}</argLine> -->
           <argLine>--add-modules jdk.internal.vm.ci --add-modules jdk.internal.vm.compiler --add-exports jdk.internal.vm.ci/jdk.vm.ci.meta=ALL-UNNAMED --add-exports jdk.internal.vm.ci/jdk.vm.ci.code=ALL-UNNAMED --add-exports jdk.internal.vm.ci/jdk.vm.ci.code.site=ALL-UNNAMED --add-exports jdk.internal.vm.ci/jdk.vm.ci.runtime=ALL-UNNAMED,jdk.internal.vm.compiler --add-exports jdk.internal.vm.ci/jdk.vm.ci.hotspot=ALL-UNNAMED,jdk.internal.vm.compiler --add-exports jdk.internal.vm.ci/jdk.vm.ci.amd64=ALL-UNNAMED --add-exports jdk.internal.vm.compiler/org.graalvm.compiler.api.runtime=ALL-UNNAMED --add-exports jdk.internal.vm.compiler/org.graalvm.compiler.hotspot=ALL-UNNAMED --add-opens jdk.internal.vm.ci/jdk.vm.ci.hotspot=ALL-UNNAMED -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCI -Xmx3g -Xss4096k -XX:MaxMetaspaceSize=${MaxMetaspaceSize} -XX:ReservedCodeCacheSize=512m</argLine>
           <stderr/>
           <environmentVariables>
-            <!--
-              Setting SPARK_DIST_CLASSPATH is a simple way to make sure any child processes
-              launched by the tests have access to the correct test-time classpath.
-            -->
-            <SPARK_DIST_CLASSPATH>${test_classpath}</SPARK_DIST_CLASSPATH>
-            <SPARK_PREPEND_CLASSES>1</SPARK_PREPEND_CLASSES>
-            <SPARK_SCALA_VERSION>${scala.binary.version}</SPARK_SCALA_VERSION>
-            <SPARK_TESTING>1</SPARK_TESTING>
+            <JVMCI_SCALA_VERSION>${scala.binary.version}</JVMCI_SCALA_VERSION>
+            <JVMCI_TESTING>1</JVMCI_TESTING>
             <JAVA_HOME>${test.java.home}</JAVA_HOME>
           </environmentVariables>
           <systemProperties>
@@ -391,13 +273,7 @@
             <derby.system.durability>test</derby.system.durability>
             <java.awt.headless>true</java.awt.headless>
             <java.io.tmpdir>${project.build.directory}/tmp</java.io.tmpdir>
-            <spark.test.home>${spark.test.home}</spark.test.home>
-            <spark.testing>1</spark.testing>
-            <spark.ui.enabled>false</spark.ui.enabled>
-            <spark.ui.showConsoleProgress>false</spark.ui.showConsoleProgress>
-            <spark.unsafe.exceptionOnMemoryLeak>true</spark.unsafe.exceptionOnMemoryLeak>
-            <!-- Needed by sql/hive tests. -->
-            <test.src.tables>__not_used__</test.src.tables>
+            <jvmci.testing>1</jvmci.testing>
           </systemProperties>
           <tagsToExclude>${test.exclude.tags}</tagsToExclude>
         </configuration>
@@ -409,67 +285,6 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.7</version>
-        <configuration>
-          <instrumentation>
-            <excludes>
-              <exclude>**/*$*</exclude>
-              <exclude>**/*$</exclude>
-              <exclude>org/apache/spark/sql/server/ui/**</exclude>
-              <exclude>org/apache/spark/sql/server/parser/**</exclude>
-              <exclude>org/apache/spark/sql/server/execution/**</exclude>
-              <exclude>org/apache/spark/sql/server/benchmark/**</exclude>
-            </excludes>
-          </instrumentation>
-          <format>xml</format>
-          <maxmem>256m</maxmem>
-          <!-- aggregated reports for multi-module projects -->
-          <aggregate>true</aggregate>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.eluder.coveralls</groupId>
-        <artifactId>coveralls-maven-plugin</artifactId>
-        <version>4.3.0</version>
-        <!-- For local uses
-        <configuration>
-          <repoToken></repoToken>
-        </configuration>
-        -->
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.5</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-          <!-- Build test-jar's for all projects, since some projects depend on tests from others -->
-          <execution>
-            <id>prepare-test-jar</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-            <configuration>
-              <excludes>
-                <exclude>log4j.properties</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-        </executions>
-        <configuration>
-          <finalName>${project.artifactId}_${project.version}</finalName>
-          <outputDirectory>${project.parent.build.directory}</outputDirectory>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
