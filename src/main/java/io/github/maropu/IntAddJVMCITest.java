@@ -15,7 +15,7 @@ public class IntAddJVMCITest {
   private static final TestRuntimeNative testApi = TestRuntimeNativeLoader.loadApi();
 
   // Address of the function defined in `libtest.dylib`
-  private static final long nativeFuncAddr = testApi.getFuncAddr();
+  private static final long nativeFuncAddr = testApi.getIntFuncAddr();
   private static Method generatedMethod;
   private static Object generatedObj;
 
@@ -107,6 +107,6 @@ public class IntAddJVMCITest {
   }
 
   public static int jniAdd(int a, int b) {
-    return testApi.callFuncFromAddr(nativeFuncAddr, a, b);
+    return testApi.callIntFuncFromAddr(nativeFuncAddr, a, b);
   }
 }

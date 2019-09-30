@@ -4,8 +4,14 @@ public class TestRuntimeNative {
   public native void initialize() throws RuntimeException;
   public native void finalize() throws RuntimeException;
 
-  public native long getFuncAddr();
-  public native int callFuncFromAddr(long f, int a, int b);
+  // (int, int) => int
+  public native long getIntFuncAddr();
+  public native int callIntFuncFromAddr(long f, int a, int b);
+  // (double, double) => double
+  public native long getDoubleFuncAddr();
+  public native double callDoubleFuncFromAddr(long f, double a, double b);
+
+  // For APIs to handle LLVM bitcode
   public native long compileToFunc(byte[] bitcode, String funcName);
   public native long getFuncAddrFromCompileState(long state);
   public native void releaseCompileState(long state);

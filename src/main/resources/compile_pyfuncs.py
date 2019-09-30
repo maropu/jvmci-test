@@ -10,4 +10,5 @@ def pyAdd(a, b):
   return a + b;
 
 write_pyfunc_as_bitcode(pyAdd, "int32(int32, int32)", "-int32")
+write_pyfunc_as_bitcode(pyAdd, "float64(float64, float64)", "-float64")
 

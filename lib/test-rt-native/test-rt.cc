@@ -79,18 +79,33 @@ static const std::string toLLVMAssemblyCode(char *bitcode, size_t size) {
   return toLLVMAssemblyCodeFromModule(m.get());
 }
 
-int testAdd(void *obj, int a, int b) {
+int testIntAdd(void *obj, int a, int b) {
   return a + b;
 }
 
-JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getFuncAddr
+JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getIntFuncAddr
     (JNIEnv *, jobject) {
-  return (long) &testAdd;
+  return (long) &testIntAdd;
 }
 
-JNIEXPORT jint JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callFuncFromAddr
+JNIEXPORT jint JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callIntFuncFromAddr
     (JNIEnv *, jobject, jlong addr, jint a, jint b) {
   int (*fpFunc)(void *, int, int) = (int (*)(void *, int, int)) addr;
+  return fpFunc(NULL, a, b);
+}
+
+double testDoubleAdd(void *obj, double a, double b) {
+  return a + b;
+}
+
+JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getDoubleFuncAddr
+    (JNIEnv *, jobject) {
+  return (long) &testDoubleAdd;
+}
+
+JNIEXPORT jdouble JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callDoubleFuncFromAddr
+    (JNIEnv *, jobject, jlong addr, jdouble a, jdouble b) {
+  double (*fpFunc)(void *, double, double) = (double (*)(void *, double, double)) addr;
   return fpFunc(NULL, a, b);
 }
 

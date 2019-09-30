@@ -25,19 +25,35 @@ JNIEXPORT void JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_finalize
 
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
- * Method:    getFuncAddr
+ * Method:    getIntFuncAddr
  * Signature: ()J
  */
-JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getFuncAddr
+JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getIntFuncAddr
   (JNIEnv *, jobject);
 
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
- * Method:    callFuncFromAddr
+ * Method:    callIntFuncFromAddr
  * Signature: (JII)I
  */
-JNIEXPORT jint JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callFuncFromAddr
+JNIEXPORT jint JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callIntFuncFromAddr
   (JNIEnv *, jobject, jlong, jint, jint);
+
+/*
+ * Class:     io_github_maropu_nvlib_TestRuntimeNative
+ * Method:    getDoubleFuncAddr
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getDoubleFuncAddr
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_github_maropu_nvlib_TestRuntimeNative
+ * Method:    callDoubleFuncFromAddr
+ * Signature: (JDD)D
+ */
+JNIEXPORT jdouble JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callDoubleFuncFromAddr
+  (JNIEnv *, jobject, jlong, jdouble, jdouble);
 
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
