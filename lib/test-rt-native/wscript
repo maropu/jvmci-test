@@ -1,0 +1,137 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import os, re, subprocess
+import platform, numpy, sys, sysconfig
+
+from waflib.Tools import waf_unit_test
+from distutils.version import StrictVersion
+from env import *
+
+def command(cmd):
+  return subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True).communicate()[0]
+
+def llvm_config(options):
+  llvm_options = re.split("[\s\n]+", command('%s %s' % (LLVM_CONFIG, options)).decode('utf-8'))
+  options = list(llvm_options)
+  for opt in llvm_options:
+    # `llvm-config` possible disable C++ exceptions, so we explicitly set it here
+    if opt == "-fno-exceptions":
+      options.remove(opt)
+  return options
+
+def options(opt):
+  opt.load('compiler_cxx waf_unit_test');
+
+def configure(ctx):
+  ctx.load('compiler_cxx waf_unit_test');
+
+  # Checks if llvm-config can be executed
+  ctx.find_program(LLVM_CONFIG)
+
+  # Checks if this platform supported
+  if sys.platform == 'linux' or sys.platform == 'linux2':
+    ctx.env['COMPILER_OS'] = 'Linux'
+    ctx.env['COMPILER_SHLIB_SUFFIX'] = 'so'
+  elif sys.platform == 'darwin':
+    ctx.env['COMPILER_OS'] = 'Mac'
+    ctx.env['COMPILER_SHLIB_SUFFIX'] = 'dylib'
+  else:
+    ctx.fatal('OS must be linux or darwin, but %s found' % sys.platform)
+
+  # Since we use C++ exceptions, so we explicitly set it here
+  ctx.env.append_value('CXXFLAGS', ['-fcxx-exceptions'])
+
+  # Currently, it only support x86_64 platforms
+  ctx.env['COMPILER_ARCH'] = 'x86_64'
+
+  # Verifies the LLVM version
+  LLVM_VERSION = re.findall("^(\d+.\d+.\d+)", llvm_config('--version')[0])[0]
+  if StrictVersion(LLVM_VERSION) < StrictVersion('7.0.0'):
+    ctx.fatal('LLVM version must be 7.0+, but LLVM %s found' % LLVM_VERSION)
+
+  # We assume 'llvm-config --system-libs' returns libs below
+  ctx.check_cxx(lib = 'm')
+  # We need to check the libs below in Linux only
+  if ctx.env['COMPILER_OS'] == 'Linux':
+    ctx.check_cxx(lib = 'pthread')
+    ctx.check_cxx(lib = 'dl')
+    ctx.check_cxx(lib = 'rt')
+
+  # Set cxxflags for compiling each source file
+  LLVM_CXXFLAGS = ['-I%s/../include' % LLVM_DIR]
+  LLVM_CXXFLAGS += llvm_config('--cxxflags')
+
+  # TODO: Needs to statically link BSD libc++
+  # LLVM_LINKFLAGS = ['-stdlib=libc++', '-nostdinc++']
+  # LLVM_LINKFLAGS += ['-I%s/include/c++/v1' % LLVM_DIR, '-L%s' %LLVM_LIB, '-Wl,-rpath,%s' % LLVM_LIB]
+
+  # To list up all the LLVM components, say 'llvm-config --components'
+  LLVM_LIBFILES = llvm_config('--libfiles all')
+  # LLVM_LIBFILES = llvm_config('--libfiles interpreter mcjit X86')
+  # LLVM_LIBFILES = llvm_config('--libfiles engine lto core jit X86')
+  # LLVM_LIBFILES = llvm_config('--libfiles engine lto')
+  #  --ldflags --libs core jit X86
+
+  if ctx.env['COMPILER_OS'] == 'Linux':
+    # For Linux platforms, uses a linker option `--whole-archive` to bundle
+    # the all the image of static LLVM libraries.
+    LLVM_LINKFLAGS = ['-Wl,--whole-archive']
+
+    LLVM_LINKFLAGS += LLVM_LIBFILES
+
+    path = ['%s/static-lib/%s/%s' % (os.getcwd(), ctx.env['COMPILER_OS'], ctx.env['COMPILER_ARCH'])]
+    # path += ['/usr/lib', '/usr/lib/x86_64-linux-gnu', '/usr/lib64']
+    # LLVM_LINKFLAGS += [ctx.find_file('libc++.a', LLVM_LI]
+    # LLVM_LINKFLAGS += [ctx.find_file('libpthread.a', path)]
+    # LLVM_LINKFLAGS += [ctx.find_file('libdl.a', path)]
+    # LLVM_LINKFLAGS += [ctx.find_file('librt.a', path)]
+    # LLVM_LINKFLAGS += [ctx.find_file('libm.a', path)]
+    LLVM_LINKFLAGS += [ctx.find_file('libtinfo.a', path)]
+    LLVM_LINKFLAGS += [ctx.find_file('libz.a', path)]
+
+    LLVM_LINKFLAGS += ['-Wl,--no-whole-archive']
+    LLVM_LINKFLAGS += ['-pthread', '-ldl', '-lrt', '-lm']
+  else: # For Mac
+    LLVM_LINKFLAGS = LLVM_LIBFILES
+    path = ['%s/static-lib/%s/%s' % (os.getcwd(), ctx.env['COMPILER_OS'], ctx.env['COMPILER_ARCH'])]
+    # path += ['/opt/local/lib']
+    LLVM_LINKFLAGS += [ctx.find_file('libncurses.a', path)]
+    LLVM_LINKFLAGS += [ctx.find_file('libz.a', path)]
+    LLVM_LINKFLAGS += ['-lm']
+
+  ctx.check_cxx(msg = 'Checking for LLVM configurations',
+                cxxflags = LLVM_CXXFLAGS,
+                linkflags = LLVM_LINKFLAGS,
+                uselib_store = 'llvm')
+
+def build(bld):
+
+  bld.shlib(source = 'test-rt.cc',
+            target = 'test-rt',
+            cflags = ['-fno-strict-aliasing', '-O2', '-fwrapv', '-Wall', '-Wstrict-prototypes'],
+            includes = [JAVAH_DIR, '%s/%s' % (JAVAH_DIR, bld.env.COMPILER_OS)],
+            use = ['llvm'])
+
+  # Strips the library and copys it into src/main/java/lib/
+  #
+  # To avoid mulformed image errors, we need to strip with options '-S -x':
+  #  - https://stackoverflow.com/questions/39381754/malformed-mach-o-image-symbol-table-underruns-linkedit
+  bld(rule = 'strip -S -x ${SRC}; cp ${SRC} ${TGT}',
+      source = 'libtest-rt.%s' % bld.env.COMPILER_SHLIB_SUFFIX,
+      target = '../../../src/main/resources/lib/%s/%s/' % (bld.env.COMPILER_OS, bld.env.COMPILER_ARCH))
+

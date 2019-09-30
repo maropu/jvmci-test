@@ -1,0 +1,13 @@
+.idea
+build/apache-maven-*
+build/scala-*
+build/zinc-*
+target
+lib/test-rt-native/llvm-*
+lib/test-rt-native/.waf*
+lib/test-rt-native/waf-*
+lib/test-rt-native/build
+lib/test-rt-native/.lock-waf_darwin_build
+__pycache__
+hs_err_pid*.log
+
