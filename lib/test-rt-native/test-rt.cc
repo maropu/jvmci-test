@@ -107,34 +107,6 @@ JNIEXPORT jint JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callIntFunc
   return fpFunc(NULL, a, b);
 }
 
-double testDoubleAdd(void *obj, double a, double b) {
-  return a + b;
-}
-
-double testDoubleMultiply(void *obj, double a, double b) {
-  return a * b;
-}
-
-JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getDoubleFuncAddr
-    (JNIEnv *env, jobject self, jint funcId) {
-  if (funcId == 1) {
-    return (long) &testDoubleAdd;
-  } else if (funcId == 2) {
-    return (long) &testDoubleMultiply;
-  } else {
-    std::stringstream errMsg;
-    errMsg << "Unknown function id: " << funcId;
-    throwException(env, self, errMsg.str());
-  }
-  return 0L; // NULL
-}
-
-JNIEXPORT jdouble JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callDoubleFuncFromAddr
-    (JNIEnv *, jobject, jlong addr, jdouble a, jdouble b) {
-  double (*fpFunc)(void *, double, double) = (double (*)(void *, double, double)) addr;
-  return fpFunc(NULL, a, b);
-}
-
 struct CompileState {
   llvm::ExecutionEngine *engine_;
   long  f_;

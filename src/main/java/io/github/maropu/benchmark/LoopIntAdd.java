@@ -108,9 +108,9 @@ public class LoopIntAdd {
 
   @Benchmark
   @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-  public void nativeAddInGeneratedMethod(Context context) throws Exception {
+  public void pyNativeAddThruInvoke(Context context) throws Exception {
     for (int i = 0; i < SIZE; i++) {
-      context.ar3[i] = IntAddJVMCITest.nativeAddInGeneratedMethod(context.ar1[i], context.ar2[i]);
+      context.ar3[i] = IntAddJVMCITest.pyNativeAddThruInvoke(context.ar1[i], context.ar2[i]);
     }
   }
 

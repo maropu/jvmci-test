@@ -45,22 +45,6 @@ JNIEXPORT jint JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callIntFunc
 
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
- * Method:    getDoubleFuncAddr
- * Signature: (I)J
- */
-JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getDoubleFuncAddr
-  (JNIEnv *, jobject, jint);
-
-/*
- * Class:     io_github_maropu_nvlib_TestRuntimeNative
- * Method:    callDoubleFuncFromAddr
- * Signature: (JDD)D
- */
-JNIEXPORT jdouble JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callDoubleFuncFromAddr
-  (JNIEnv *, jobject, jlong, jdouble, jdouble);
-
-/*
- * Class:     io_github_maropu_nvlib_TestRuntimeNative
  * Method:    compileToFunc
  * Signature: ([BLjava/lang/String;Z)J
  */

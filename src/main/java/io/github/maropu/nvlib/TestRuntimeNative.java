@@ -12,9 +12,6 @@ public class TestRuntimeNative {
   // (int, int) => int
   public native long getIntFuncAddr(int funcId);
   public native int callIntFuncFromAddr(long f, int a, int b);
-  // (double, double) => double
-  public native long getDoubleFuncAddr(int funcId);
-  public native double callDoubleFuncFromAddr(long f, double a, double b);
 
   // For APIs to handle LLVM bitcode
   public native long compileToFunc(byte[] bitcode, String funcName, boolean isStatic);
