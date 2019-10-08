@@ -1,18 +1,23 @@
 package io.github.maropu.nvlib;
 
 public class TestRuntimeNative {
+
+  public static final int FUNCTION_ID_ADD = 1;
+  public static final int FUNCTION_ID_MULTIPLY= 2;
+
   public native void initialize() throws RuntimeException;
   public native void finalize() throws RuntimeException;
 
+  // funcId is 1 for add and 2 for multiply
   // (int, int) => int
-  public native long getIntFuncAddr();
+  public native long getIntFuncAddr(int funcId);
   public native int callIntFuncFromAddr(long f, int a, int b);
   // (double, double) => double
-  public native long getDoubleFuncAddr();
+  public native long getDoubleFuncAddr(int funcId);
   public native double callDoubleFuncFromAddr(long f, double a, double b);
 
   // For APIs to handle LLVM bitcode
-  public native long compileToFunc(byte[] bitcode, String funcName);
+  public native long compileToFunc(byte[] bitcode, String funcName, boolean isStatic);
   public native long getFuncAddrFromCompileState(long state);
   public native void releaseCompileState(long state);
 

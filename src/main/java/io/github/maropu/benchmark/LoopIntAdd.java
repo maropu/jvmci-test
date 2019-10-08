@@ -108,7 +108,7 @@ public class LoopIntAdd {
 
   @Benchmark
   @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-  public void nativeAddInGeneratedMethod(Context context) {
+  public void nativeAddInGeneratedMethod(Context context) throws Exception {
     for (int i = 0; i < SIZE; i++) {
       context.ar3[i] = IntAddJVMCITest.nativeAddInGeneratedMethod(context.ar1[i], context.ar2[i]);
     }

@@ -7,6 +7,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef io_github_maropu_nvlib_TestRuntimeNative_FUNCTION_ID_ADD
+#define io_github_maropu_nvlib_TestRuntimeNative_FUNCTION_ID_ADD 1L
+#undef io_github_maropu_nvlib_TestRuntimeNative_FUNCTION_ID_MULTIPLY
+#define io_github_maropu_nvlib_TestRuntimeNative_FUNCTION_ID_MULTIPLY 2L
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
  * Method:    initialize
@@ -26,10 +30,10 @@ JNIEXPORT void JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_finalize
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
  * Method:    getIntFuncAddr
- * Signature: ()J
+ * Signature: (I)J
  */
 JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getIntFuncAddr
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jint);
 
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
@@ -42,10 +46,10 @@ JNIEXPORT jint JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callIntFunc
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
  * Method:    getDoubleFuncAddr
- * Signature: ()J
+ * Signature: (I)J
  */
 JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getDoubleFuncAddr
-  (JNIEnv *, jobject);
+  (JNIEnv *, jobject, jint);
 
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
@@ -58,10 +62,10 @@ JNIEXPORT jdouble JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callDoub
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative
  * Method:    compileToFunc
- * Signature: ([BLjava/lang/String;)J
+ * Signature: ([BLjava/lang/String;Z)J
  */
 JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_compileToFunc
-  (JNIEnv *, jobject, jbyteArray, jstring);
+  (JNIEnv *, jobject, jbyteArray, jstring, jboolean);
 
 /*
  * Class:     io_github_maropu_nvlib_TestRuntimeNative

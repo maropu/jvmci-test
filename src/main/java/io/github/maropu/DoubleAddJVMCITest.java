@@ -15,7 +15,8 @@ public class DoubleAddJVMCITest {
   private static final TestRuntimeNative testApi = TestRuntimeNativeLoader.loadApi();
 
   // Address of the function defined in `libtest.dylib`
-  private static final long nativeFuncAddr = testApi.getDoubleFuncAddr();
+  private static final long nativeFuncAddr =
+    testApi.getDoubleFuncAddr(TestRuntimeNative.FUNCTION_ID_ADD);
   private static Method generatedMethod;
   private static Object generatedObj;
 
@@ -35,7 +36,7 @@ public class DoubleAddJVMCITest {
     // Generates a base class to call native code
     ClassBodyEvaluator ev = new ClassBodyEvaluator();
     String code = "public static double plus(double a, double b) { " +
-      "throw new java.lang.UnsupportedOperationException(\"from Java code\"); }";
+      "throw new java.lang.UnsupportedOperationException(\"from generated Java code\"); }";
     ev.cook("generated.java", code);
     Class clazz = ev.getClazz();
     generatedMethod = clazz.getMethod("plus", double.class, double.class);
@@ -43,6 +44,12 @@ public class DoubleAddJVMCITest {
 
     // Injects native code to a Java method in the generated class
     new AsmInjector().injectFuncAddr(nativeFuncAddr, generatedMethod);
+  }
+
+  private static byte[] byteArrayFromResource(String path) throws IOException {
+    InputStream inputStream =
+      Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+    return inputStream.readAllBytes();
   }
 
   static void initializePyNativeAdd() throws Exception {
@@ -61,7 +68,7 @@ public class DoubleAddJVMCITest {
         testApi.toLLVMAssemblyCode(bitcode),
         testApi.toX86_64AssemblyCode(bitcode)
       ));
-    long compileState = testApi.compileToFunc(bitcode, funcNameInBitcode);
+    long compileState = testApi.compileToFunc(bitcode, funcNameInBitcode, true);
     pyNativeFuncAddr = testApi.getFuncAddrFromCompileState(compileState);
     Method m = DoubleAddJVMCITest.class.getMethod("pyNativeAdd", double.class, double.class);
     new AsmInjector().injectFuncAddr(pyNativeFuncAddr, m);
@@ -80,22 +87,12 @@ public class DoubleAddJVMCITest {
     }
   }
 
-  private static byte[] byteArrayFromResource(String path) throws IOException {
-    InputStream inputStream =
-      Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-    return inputStream.readAllBytes();
-  }
-
   public static double nativeAdd(double a, double b) {
     throw new UnsupportedOperationException("from Java code");
   }
 
-  public static double nativeAddInGeneratedMethod(double a, double b) {
-    try {
-      return (double) generatedMethod.invoke(generatedObj, a, b);
-    } catch (Throwable e) {
-      throw new UnsupportedOperationException("from Java code");
-    }
+  public static double nativeAddInGeneratedMethod(double a, double b) throws Exception {
+    return (double) generatedMethod.invoke(generatedObj, a, b);
   }
 
   public static double pyNativeAdd(double a, double b) {

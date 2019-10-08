@@ -83,9 +83,22 @@ int testIntAdd(void *obj, int a, int b) {
   return a + b;
 }
 
+int testIntMultiply(void *obj, int a, int b) {
+  return a * b;
+}
+
 JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getIntFuncAddr
-    (JNIEnv *, jobject) {
-  return (long) &testIntAdd;
+    (JNIEnv *env, jobject self, jint funcId) {
+  if (funcId == 1) {
+    return (long) &testIntAdd;
+  } else if (funcId == 2) {
+    return (long) &testIntMultiply;
+  } else {
+    std::stringstream errMsg;
+    errMsg << "Unknown function id: " << funcId;
+    throwException(env, self, errMsg.str());
+  }
+  return 0L; // NULL
 }
 
 JNIEXPORT jint JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callIntFuncFromAddr
@@ -98,9 +111,22 @@ double testDoubleAdd(void *obj, double a, double b) {
   return a + b;
 }
 
+double testDoubleMultiply(void *obj, double a, double b) {
+  return a * b;
+}
+
 JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_getDoubleFuncAddr
-    (JNIEnv *, jobject) {
-  return (long) &testDoubleAdd;
+    (JNIEnv *env, jobject self, jint funcId) {
+  if (funcId == 1) {
+    return (long) &testDoubleAdd;
+  } else if (funcId == 2) {
+    return (long) &testDoubleMultiply;
+  } else {
+    std::stringstream errMsg;
+    errMsg << "Unknown function id: " << funcId;
+    throwException(env, self, errMsg.str());
+  }
+  return 0L; // NULL
 }
 
 JNIEXPORT jdouble JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_callDoubleFuncFromAddr
@@ -119,7 +145,7 @@ struct CompileState {
 };
 
 JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_compileToFunc
-    (JNIEnv *env, jobject self, jbyteArray bitcode, jstring funcName) {
+    (JNIEnv *env, jobject self, jbyteArray bitcode, jstring funcName, jboolean isStatic) {
 
   const std::string entryPointFuncName = "entry_point";
 
@@ -138,22 +164,45 @@ JNIEXPORT jlong JNICALL Java_io_github_maropu_nvlib_TestRuntimeNative_compileToF
 
     // Inserts a trampoline code in the LLVM module:
     //  - http://releases.llvm.org/7.0.1/docs/tutorial/index.html
-    // llvm::FunctionType *epf_signature = llvm::TypeBuilder<int(void *, int, int), false>::get(context);
-    llvm::FunctionType *epf_signature = llvm::FunctionType::get(
-      llvm::Type::getInt32Ty(context),
-      {llvm::PointerType::get(llvm::Type::getVoidTy(context), 0), llvm::Type::getInt32Ty(context), llvm::Type::getInt32Ty(context)},
-      false
-    );
+    llvm::FunctionType *epf_signature = NULL;
+    if (!isStatic) {
+      // llvm::TypeBuilder<int(void *, int, int), false>::get(context);
+      epf_signature = llvm::FunctionType::get(
+        llvm::Type::getInt32Ty(context),
+        {
+          llvm::PointerType::get(llvm::Type::getVoidTy(context), 0),
+          llvm::PointerType::get(llvm::Type::getVoidTy(context), 0),
+          llvm::Type::getInt32Ty(context),
+          llvm::Type::getInt32Ty(context)
+        },
+        false
+      );
+    } else {
+      // llvm::TypeBuilder<int(void *, void *, int, int), false>::get(context);
+      epf_signature = llvm::FunctionType::get(
+        llvm::Type::getInt32Ty(context),
+        {
+          llvm::PointerType::get(llvm::Type::getVoidTy(context), 0),
+          llvm::Type::getInt32Ty(context),
+          llvm::Type::getInt32Ty(context)
+        },
+        false
+      );
+    }
     llvm::Function *epf = llvm::cast<llvm::Function>(m->getOrInsertFunction(entryPointFuncName, epf_signature));
     epf->setCallingConv(llvm::CallingConv::C);
-    epf->arg_begin();
     llvm::Function::arg_iterator args = epf->arg_begin();
-    llvm::Value *obj = args++;
-    obj->setName("obj");
+    if (!isStatic) {
+      (args++)->setName("unused1");
+      (args++)->setName("unused2");
+    } else {
+      (args++)->setName("unused");
+    }
     llvm::Value *x = args++;
     x->setName("x");
     llvm::Value *y = args++;
     y->setName("y");
+
     llvm::BasicBlock *block = llvm::BasicBlock::Create(context, "entry", epf);
     llvm::IRBuilder<> builder(block);
     llvm::Value *result = builder.CreateCall(f, {x, y});

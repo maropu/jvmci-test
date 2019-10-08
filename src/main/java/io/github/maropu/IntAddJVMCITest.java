@@ -15,7 +15,8 @@ public class IntAddJVMCITest {
   private static final TestRuntimeNative testApi = TestRuntimeNativeLoader.loadApi();
 
   // Address of the function defined in `libtest.dylib`
-  private static final long nativeFuncAddr = testApi.getIntFuncAddr();
+  private static final long nativeFuncAddr =
+    testApi.getIntFuncAddr(TestRuntimeNative.FUNCTION_ID_ADD);
   private static Method generatedMethod;
   private static Object generatedObj;
 
@@ -35,7 +36,7 @@ public class IntAddJVMCITest {
     // Generates a base class to call native code
     ClassBodyEvaluator ev = new ClassBodyEvaluator();
     String code = "public static int plus(int a, int b) { " +
-      "throw new java.lang.UnsupportedOperationException(\"from Java code\"); }";
+      "throw new java.lang.UnsupportedOperationException(\"from generated Java code\"); }";
     ev.cook("generated.java", code);
     Class clazz = ev.getClazz();
     generatedMethod = clazz.getMethod("plus", int.class, int.class);
@@ -43,6 +44,12 @@ public class IntAddJVMCITest {
 
     // Injects native code to a Java method in the generated class
     new AsmInjector().injectFuncAddr(nativeFuncAddr, generatedMethod);
+  }
+
+  private static byte[] byteArrayFromResource(String path) throws IOException {
+    InputStream inputStream =
+      Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+    return inputStream.readAllBytes();
   }
 
   static void initializePyNativeAdd() throws Exception {
@@ -61,7 +68,7 @@ public class IntAddJVMCITest {
         testApi.toLLVMAssemblyCode(bitcode),
         testApi.toX86_64AssemblyCode(bitcode)
       ));
-    long compileState = testApi.compileToFunc(bitcode, funcNameInBitcode);
+    long compileState = testApi.compileToFunc(bitcode, funcNameInBitcode, true);
     pyNativeFuncAddr = testApi.getFuncAddrFromCompileState(compileState);
     Method m = IntAddJVMCITest.class.getMethod("pyNativeAdd", int.class, int.class);
     new AsmInjector().injectFuncAddr(pyNativeFuncAddr, m);
@@ -80,22 +87,12 @@ public class IntAddJVMCITest {
     }
   }
 
-  private static byte[] byteArrayFromResource(String path) throws IOException {
-    InputStream inputStream =
-      Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-    return inputStream.readAllBytes();
-  }
-
   public static int nativeAdd(int a, int b) {
     throw new UnsupportedOperationException("from Java code");
   }
 
-  public static int nativeAddInGeneratedMethod(int a, int b) {
-    try {
-      return (int) generatedMethod.invoke(generatedObj, a, b);
-    } catch (Throwable e) {
-      throw new UnsupportedOperationException("from Java code");
-    }
+  public static int nativeAddInGeneratedMethod(int a, int b) throws Exception {
+    return (int) generatedMethod.invoke(generatedObj, a, b);
   }
 
   public static int pyNativeAdd(int a, int b) {
