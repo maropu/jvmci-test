@@ -51,7 +51,7 @@
     <scala.version>2.12.10</scala.version>
     <scala.binary.version>2.12</scala.binary.version>
     <maven.version>3.6.2</maven.version>
-    <snappy.version>1.1.2.6</snappy.version>
+    <snappy.version>1.1.10.1</snappy.version>
     <janino.version>3.0.0</janino.version>
     <jmh.version>1.19</jmh.version>
     <scalatest.version>3.0.5</scalatest.version>
